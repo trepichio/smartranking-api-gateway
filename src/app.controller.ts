@@ -13,9 +13,12 @@ import {
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
+import { createCategoryDTO } from './dtos/createCategory.dto';
 
 @Controller('api/v1')
 export class AppController {
+  private logger = new Logger(AppController.name);
+
   private clientAdminBackend: ClientProxy;
 
   constructor() {
@@ -38,4 +41,9 @@ export class AppController {
     });
   }
 
+  @Post('categories')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  createCategory(@Body() dto: createCategoryDTO) {
+    return this.clientAdminBackend.emit('create-category', dto);
+  }
 }
