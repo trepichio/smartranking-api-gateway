@@ -46,4 +46,9 @@ export class AppController {
   createCategory(@Body() dto: createCategoryDTO) {
     return this.clientAdminBackend.emit('create-category', dto);
   }
+
+  @Get('categories')
+  getCategories(@Query('categoryId') _id = '') {
+    return this.clientAdminBackend.send('get-categories', _id);
+  }
 }
