@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Logger,
   Param,
@@ -60,4 +61,8 @@ export class AppController {
     return this.clientAdminBackend.emit('update-category', { id, dto });
   }
 
+  @Delete('categories/:id')
+  deleteCategory(@Param('id') id) {
+    return this.clientAdminBackend.emit('delete-category', { id });
+  }
 }
