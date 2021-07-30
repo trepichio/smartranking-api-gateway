@@ -57,6 +57,7 @@ export class CategoryController {
   }
 
   @Put(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   updateCategory(@Body() dto: updateCategoryDTO, @Param('id') id) {
     return this.clientAdminBackend.emit('update-category', { id, dto });
   }
