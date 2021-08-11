@@ -4,10 +4,13 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,11 +18,15 @@ import { ClientProxySmartRanking } from 'src/proxyrmq/client-proxy.provider';
 import { ValidationParamsPipe } from 'src/common/pipes/validation-params';
 import { createPlayerDTO } from './dtos/createPlayer.dto';
 import { updatePlayerDTO } from './dtos/updatePlayer.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AwsService } from 'src/aws/aws.service';
 
 @Controller('api/v1/players')
 export class PlayerController {
+  private readonly logger = new Logger(PlayerController.name);
   constructor(
     private readonly clientProxySmartRanking: ClientProxySmartRanking,
+    private readonly awsService: AwsService,
   ) {}
 
   private clientAdminBackend =
@@ -74,5 +81,40 @@ export class PlayerController {
   @Delete(':id')
   deletePlayer(@Param('id', ValidationParamsPipe) id: string) {
     return this.clientAdminBackend.emit('delete-player', { id });
+  }
+
+  @Post(':id/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @UploadedFile() file,
+    @Param('id', ValidationParamsPipe) id: string,
+  ) {
+    this.logger.log(`Uploaded file ${JSON.stringify(file, null, 2)}`);
+
+    try {
+      const player = await this.clientAdminBackend
+        .send('get-players', id)
+        .toPromise();
+      if (!player) {
+        throw new Error('');
+      }
+    } catch (err) {
+      this.logger;
+      throw new BadRequestException(`Player with id ${id} not found`);
+    }
+
+    const data = await this.awsService.uploadFile(file, id);
+    const updatePlayerDTO: updatePlayerDTO = {
+      urlProfilePicture: data.url,
+    };
+
+    await this.clientAdminBackend
+      .emit('update-player', {
+        id,
+        dto: updatePlayerDTO,
+      })
+      .toPromise();
+
+    return await this.clientAdminBackend.send('get-players', id).toPromise();
   }
 }
