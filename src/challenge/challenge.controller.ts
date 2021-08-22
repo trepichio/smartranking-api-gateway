@@ -13,12 +13,14 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ValidationParamsPipe } from 'src/common/pipes/validation-params';
+import { addMatchToChallengeDTO } from 'src/challenge/dtos/add-match-to-challenge.dto';
 import { createChallengeDTO } from './dtos/create-challenge.dto';
 import { updateChallengeDTO } from './dtos/update-challenge.dto';
 import { ChallengeInterface } from './interfaces/challenge.interface';
 import { ClientProxySmartRanking } from 'src/proxyrmq/client-proxy.provider';
 import { ChallengeStatus } from './interfaces/challenge-status.enum';
 import { PlayerInterface } from 'src/player/interfaces/player.interface';
+import { MatchInterface } from './interfaces/match.interface';
 
 @Controller('api/v1/challenges')
 export class ChallengeController {
@@ -180,5 +182,69 @@ export class ChallengeController {
      * and delete the challenge
      */
     this.clientChallenges.emit('delete-challenge', challengeId);
+  }
+
+  @Post(':challengeId/match')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async addMatch(
+    @Param('challengeId', ValidationParamsPipe) challengeId: string,
+    @Body() dto: addMatchToChallengeDTO,
+  ): Promise<void> {
+    this.logger.log(`addMatchToChallengeDTO: ${JSON.stringify(dto)}`);
+
+    /**
+     * Check if challengeId is valid
+     */
+    const challengeFound = await this.clientChallenges
+      .send('get-challenges', { challengeId })
+      .toPromise();
+
+    if (!challengeFound) {
+      throw new BadRequestException(`Challenge with ${challengeId} not found`);
+    }
+
+    /**
+     * Check if challenge status is FINISHED and refuse to update the challenge
+     */
+    if (challengeFound.status === ChallengeStatus.FINISHED) {
+      throw new BadRequestException(
+        `Challenge with ${challengeId} is already FINISHED!
+        This challenge cannot be updated anymore.`,
+      );
+    }
+
+    /**
+     * Check if challenge status is not ACCEPTED and refuse to update the challenge
+     */
+    if (challengeFound.status !== ChallengeStatus.ACCEPTED) {
+      throw new BadRequestException(
+        `Only challenges which are ACCEPTED can add a match`,
+      );
+    }
+
+    /**
+     * Check if winner is really one of the players of the challenge
+     */
+    if (!challengeFound.players.find((playerId) => playerId === dto.winner)) {
+      throw new BadRequestException(
+        `The winner player ${dto.winner} is not included in the challenge ${challengeId}`,
+      );
+    }
+
+    /**
+     * then add category, players and this challenge to the match DTO
+     */
+    const match: MatchInterface = {
+      category: challengeFound.category,
+      winner: dto.winner,
+      result: dto.result,
+      players: challengeFound.players,
+      challenge: challengeId,
+    };
+
+    /**
+     * and then it can create a match and add it to the challenge
+     */
+    this.clientChallenges.emit('create-match', match);
   }
 }
