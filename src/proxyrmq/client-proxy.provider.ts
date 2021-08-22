@@ -8,12 +8,21 @@ import {
 @Injectable()
 export class ClientProxySmartRanking {
   private clientProxyAdminInstance: ClientProxy;
+  private clientProxyChallengesInstance: ClientProxy;
 
   private getClientProxyAdminBackendInstance(): ClientProxy {
     if (!this.clientProxyAdminInstance) {
       this.clientProxyAdminInstance = this.createClientProxy('admin-backend');
     }
     return this.clientProxyAdminInstance;
+  }
+
+  private getClientProxyChallengesBackendInstance(): ClientProxy {
+    if (!this.clientProxyChallengesInstance) {
+      this.clientProxyChallengesInstance =
+        this.createClientProxy('challenges-backend');
+    }
+    return this.clientProxyChallengesInstance;
   }
 
   private createClientProxy(queueName: string): ClientProxy {
@@ -26,20 +35,22 @@ export class ClientProxySmartRanking {
     } = process.env;
 
     return ClientProxyFactory.create({
-        transport: Transport.RMQ,
-        options: {
-          urls: [
-            `amqp://${BROKER_USER}:${BROKER_PASSWORD}@${BROKER_IP}:${BROKER_PORT}/${BROKER_VIRTUAL_HOST}`,
-          ],
+      transport: Transport.RMQ,
+      options: {
+        urls: [
+          `amqp://${BROKER_USER}:${BROKER_PASSWORD}@${BROKER_IP}:${BROKER_PORT}/${BROKER_VIRTUAL_HOST}`,
+        ],
         queue: queueName,
-        },
-      });
-    }
+      },
+    });
+  }
 
   getClientProxyInstance(serviceName: string): ClientProxy {
     switch (serviceName) {
       case 'admin':
         return this.getClientProxyAdminBackendInstance();
+      case 'challenges':
+        return this.getClientProxyChallengesBackendInstance();
     }
   }
 }
