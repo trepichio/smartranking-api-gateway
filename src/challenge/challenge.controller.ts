@@ -161,4 +161,24 @@ export class ChallengeController {
     });
   }
 
+  @Delete(':challengeId')
+  async deleteOne(
+    @Param('challengeId', ValidationParamsPipe) challengeId: string,
+  ): Promise<void> {
+    /**
+     * Check if challengeId is valid
+     */
+    const challengeFound = await this.clientChallenges
+      .send('get-challenges', { challengeId })
+      .toPromise();
+
+    if (!challengeFound) {
+      throw new BadRequestException(`Challenge with ${challengeId} not found`);
+    }
+
+    /**
+     * and delete the challenge
+     */
+    this.clientChallenges.emit('delete-challenge', challengeId);
+  }
 }
