@@ -30,7 +30,7 @@ export class PlayerController {
   ) {}
 
   private clientAdminBackend =
-    this.clientProxySmartRanking.getClientProxyAdminBackendInstance();
+    this.clientProxySmartRanking.getClientProxyInstance('admin');
 
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true }))

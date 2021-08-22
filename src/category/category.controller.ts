@@ -24,7 +24,7 @@ export class CategoryController {
   ) {}
 
   private clientAdminBackend =
-    this.clientProxySmartRanking.getClientProxyAdminBackendInstance();
+    this.clientProxySmartRanking.getClientProxyInstance('admin');
 
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true }))
