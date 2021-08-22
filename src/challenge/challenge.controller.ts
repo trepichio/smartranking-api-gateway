@@ -12,9 +12,12 @@ import {
   ValidationPipe,
   BadRequestException,
 } from '@nestjs/common';
+import { ValidationParamsPipe } from 'src/common/pipes/validation-params';
 import { createChallengeDTO } from './dtos/create-challenge.dto';
+import { updateChallengeDTO } from './dtos/update-challenge.dto';
 import { ChallengeInterface } from './interfaces/challenge.interface';
 import { ClientProxySmartRanking } from 'src/proxyrmq/client-proxy.provider';
+import { ChallengeStatus } from './interfaces/challenge-status.enum';
 import { PlayerInterface } from 'src/player/interfaces/player.interface';
 
 @Controller('api/v1/challenges')
@@ -118,4 +121,44 @@ export class ChallengeController {
       .emit('create-challenge', dto)
       .toPromise();
   }
+
+  @Put(':challengeId')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async updateChallenge(
+    @Param('challengeId', ValidationParamsPipe) challengeId: string,
+    @Body() dto: updateChallengeDTO,
+  ): Promise<void> {
+    this.logger.log(`updateChallengeDTO: ${JSON.stringify(dto)}`);
+
+    /**
+     * Check if challengeId is valid
+     */
+    const challengeFound = await this.clientChallenges
+      .send('get-challenges', { challengeId })
+      .toPromise();
+
+    if (!challengeFound) {
+      throw new BadRequestException(
+        `Challenge with id ${challengeId} not found`,
+      );
+    }
+
+    /**
+     * Check if challenge status is PENDING
+     */
+    if (challengeFound.status !== ChallengeStatus.PENDING) {
+      throw new BadRequestException(
+        `Challenge with ${challengeId} is not PENDING, it is ${challengeFound.status} and cannot be updated.`,
+      );
+    }
+
+    /**
+     * and update the challenge
+     */
+    this.clientChallenges.emit('update-challenge', {
+      challengeId,
+      dto,
+    });
+  }
+
 }
