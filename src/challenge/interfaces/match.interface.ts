@@ -1,13 +1,13 @@
-import { PlayerInterface } from 'src/player/interfaces/player.interface';
+import { IPlayer } from 'src/player/interfaces/player.interface';
 
-export interface MatchInterface {
+export interface IMatch {
   challenge?: string;
   category?: string;
-  players?: Array<PlayerInterface>;
-  winner?: PlayerInterface;
-  result?: Array<ResultInterface>;
+  players?: Array<IPlayer>;
+  winner?: IPlayer;
+  result?: Array<IResult>;
 }
 
-export interface ResultInterface {
+export interface IResult {
   set: string;
 }

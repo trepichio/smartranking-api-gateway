@@ -5,7 +5,7 @@ import {
   IsDateString,
   IsNotEmpty,
 } from 'class-validator';
-import { PlayerInterface } from 'src/player/interfaces/player.interface';
+import { IPlayer } from 'src/player/interfaces/player.interface';
 
 export class createChallengeDTO {
   @IsNotEmpty()
@@ -21,5 +21,5 @@ export class createChallengeDTO {
   @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(2)
-  players: Array<PlayerInterface>;
+  players: Array<IPlayer>;
 }

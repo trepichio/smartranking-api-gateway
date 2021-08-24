@@ -16,11 +16,11 @@ import { ValidationParamsPipe } from 'src/common/pipes/validation-params';
 import { addMatchToChallengeDTO } from 'src/challenge/dtos/add-match-to-challenge.dto';
 import { createChallengeDTO } from './dtos/create-challenge.dto';
 import { updateChallengeDTO } from './dtos/update-challenge.dto';
-import { ChallengeInterface } from './interfaces/challenge.interface';
+import { IChallenge } from './interfaces/challenge.interface';
 import { ClientProxySmartRanking } from 'src/proxyrmq/client-proxy.provider';
 import { ChallengeStatus } from './interfaces/challenge-status.enum';
-import { PlayerInterface } from 'src/player/interfaces/player.interface';
-import { MatchInterface } from './interfaces/match.interface';
+import { IPlayer } from 'src/player/interfaces/player.interface';
+import { IMatch } from './interfaces/match.interface';
 
 @Controller('api/v1/challenges')
 export class ChallengeController {
@@ -40,7 +40,7 @@ export class ChallengeController {
   async getChallenges(
     @Param('challengeId') challengeId: string = '',
     @Query('playerId') playerId: string = '',
-  ): Promise<ChallengeInterface[]> {
+  ): Promise<IChallenge[]> {
     if (!challengeId && playerId) {
       /**
        * Check if playerId is valid
@@ -64,14 +64,12 @@ export class ChallengeController {
 
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  async createChallenge(
-    @Body() dto: createChallengeDTO,
-  ): Promise<ChallengeInterface> {
+  async createChallenge(@Body() dto: createChallengeDTO): Promise<IChallenge> {
     this.logger.log(`createChallengeDTO: ${JSON.stringify(dto, null, 2)}`);
 
     const { requester, players, category } = dto;
 
-    let playersFound: PlayerInterface[] = [];
+    let playersFound: IPlayer[] = [];
 
     /**
      * Check if category is valid
@@ -234,7 +232,7 @@ export class ChallengeController {
     /**
      * then add category, players and this challenge to the match DTO
      */
-    const match: MatchInterface = {
+    const match: IMatch = {
       category: challengeFound.category,
       winner: dto.winner,
       result: dto.result,

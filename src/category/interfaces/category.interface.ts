@@ -1,8 +1,8 @@
-import { EventInterface } from './event.interface';
+import { IEvent } from './event.interface';
 
-export interface CategoryInterface {
+export interface ICategory {
   readonly _id: string;
   readonly category: string;
   description: string;
-  events: Array<EventInterface>;
+  events: Array<IEvent>;
 }

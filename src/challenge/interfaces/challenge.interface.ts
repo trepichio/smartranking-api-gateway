@@ -1,13 +1,13 @@
-import { PlayerInterface } from 'src/player/interfaces/player.interface';
+import { IPlayer } from 'src/player/interfaces/player.interface';
 import { ChallengeStatus } from './challenge-status.enum';
 
-export interface ChallengeInterface {
+export interface IChallenge {
   dateTimeChallenge: Date;
   status: ChallengeStatus;
   dateTimeRequest: Date;
   dateTimeReply: Date;
-  requester: PlayerInterface;
+  requester: IPlayer;
   category: string;
   match?: string;
-  players: Array<PlayerInterface>;
+  players: Array<IPlayer>;
 }

@@ -1,11 +1,11 @@
 import { IsNotEmpty } from 'class-validator';
-import { PlayerInterface } from 'src/player/interfaces/player.interface';
-import { ResultInterface } from '../interfaces/match.interface';
+import { IPlayer } from 'src/player/interfaces/player.interface';
+import { IResult } from '../interfaces/match.interface';
 
 export class addMatchToChallengeDTO {
   @IsNotEmpty()
-  winner: PlayerInterface;
+  winner: IPlayer;
 
   @IsNotEmpty()
-  result: Array<ResultInterface>;
+  result: Array<IResult>;
 }
