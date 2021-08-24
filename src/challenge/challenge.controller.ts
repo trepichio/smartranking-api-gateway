@@ -67,7 +67,7 @@ export class ChallengeController {
   async createChallenge(
     @Body() dto: createChallengeDTO,
   ): Promise<ChallengeInterface> {
-    this.logger.log(`createChallengeDTO: ${JSON.stringify(dto)}`);
+    this.logger.log(`createChallengeDTO: ${JSON.stringify(dto, null, 2)}`);
 
     const { requester, players, category } = dto;
 
@@ -130,7 +130,7 @@ export class ChallengeController {
     @Param('challengeId', ValidationParamsPipe) challengeId: string,
     @Body() dto: updateChallengeDTO,
   ): Promise<void> {
-    this.logger.log(`updateChallengeDTO: ${JSON.stringify(dto)}`);
+    this.logger.log(`updateChallengeDTO: ${JSON.stringify(dto, null, 2)}`);
 
     /**
      * Check if challengeId is valid
@@ -190,7 +190,7 @@ export class ChallengeController {
     @Param('challengeId', ValidationParamsPipe) challengeId: string,
     @Body() dto: addMatchToChallengeDTO,
   ): Promise<void> {
-    this.logger.log(`addMatchToChallengeDTO: ${JSON.stringify(dto)}`);
+    this.logger.log(`addMatchToChallengeDTO: ${JSON.stringify(dto, null, 2)}`);
 
     /**
      * Check if challengeId is valid
