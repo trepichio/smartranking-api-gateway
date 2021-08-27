@@ -1,5 +1,13 @@
-import { Transform } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { IEvent } from '../interfaces/event.interface';
 
 export class createCategoryDTO {
@@ -14,6 +22,8 @@ export class createCategoryDTO {
   @IsNotEmpty()
   @IsArray()
   @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => Event)
   @Transform(({ value }): IEvent[] =>
     value.map((event) =>
       Object.assign(event, {
@@ -22,4 +32,17 @@ export class createCategoryDTO {
     ),
   )
   events: Array<IEvent>;
+}
+
+class Event {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsEnum(['+', '-'])
+  operation: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  value: number;
 }
