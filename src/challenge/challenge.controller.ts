@@ -10,13 +10,16 @@ import {
   Query,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ValidationParamsPipe } from 'src/common/pipes/validation-params';
 import { addMatchToChallengeDTO } from 'src/challenge/dtos/add-match-to-challenge.dto';
 import { createChallengeDTO } from './dtos/create-challenge.dto';
 import { updateChallengeDTO } from './dtos/update-challenge.dto';
 import { ChallengeService } from './challenge.service';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('api/v1/challenges')
 export class ChallengeController {
   constructor(private readonly challengeService: ChallengeService) {}

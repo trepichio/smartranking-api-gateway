@@ -8,13 +8,16 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { createCategoryDTO } from './dtos/createCategory.dto';
 import { updateCategoryDTO } from './dtos/updateCategory.dto';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('api/v1/categories')
 export class CategoryController {
   private logger = new Logger(CategoryController.name);

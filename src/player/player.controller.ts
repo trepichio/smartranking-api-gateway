@@ -8,7 +8,9 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -18,7 +20,10 @@ import { createPlayerDTO } from './dtos/createPlayer.dto';
 import { updatePlayerDTO } from './dtos/updatePlayer.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PlayerService } from './player.service';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('api/v1/players')
 export class PlayerController {
   private readonly logger = new Logger(PlayerController.name);
@@ -41,7 +46,11 @@ export class PlayerController {
   }
 
   @Get()
-  async getPlayers(@Query('playerId') _id: string = ''): Promise<any> {
+  async getPlayers(
+    @Query('playerId') _id: string = '',
+    @Req() req: Request,
+  ): Promise<any> {
+    this.logger.log(`Request: ${JSON.stringify(req.user, null, 2)}`);
     return await this.playerService.getPlayers(_id);
   }
 
