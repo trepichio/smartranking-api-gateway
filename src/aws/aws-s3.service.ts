@@ -1,15 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
+import { AwsS3Config } from './aws-s3.config';
 
 @Injectable()
-export class AwsService {
-  private logger = new Logger(AwsService.name);
+export class AwsS3Service {
+  private logger = new Logger(AwsS3Service.name);
+
+  constructor(private readonly awsS3Config: AwsS3Config) {}
 
   public async uploadFile(file: Express.Multer.File, id: string): Promise<any> {
     const s3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION,
+      accessKeyId: this.awsS3Config.accessKeyId,
+      secretAccessKey: this.awsS3Config.secretKey,
+      region: this.awsS3Config.region,
     });
 
     const fileExtension = file.originalname.substr(-3);
@@ -17,7 +20,7 @@ export class AwsService {
     this.logger.log(`urlKey:${urlKey}`);
 
     const params = {
-      Bucket: process.env.AWS_BUCKET,
+      Bucket: this.awsS3Config.bucket,
       Key: urlKey,
       Body: file.buffer,
     };
@@ -28,7 +31,7 @@ export class AwsService {
       .then(
         (data) => {
           this.logger.log(data);
-          const url = `https://${process.env.AWS_BUCKET}.s3-${process.env.AWS_REGION}.amazonaws.com/${urlKey}`;
+          const url = `https://${this.awsS3Config.bucket}.s3-${this.awsS3Config.region}.amazonaws.com/${urlKey}`;
           return { url };
         },
         (err) => {
