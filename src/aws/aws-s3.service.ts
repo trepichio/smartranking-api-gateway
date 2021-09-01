@@ -9,38 +9,32 @@ export class AwsS3Service {
   constructor(private readonly awsS3Config: AwsS3Config) {}
 
   public async uploadFile(file: Express.Multer.File, id: string): Promise<any> {
-    const s3 = new AWS.S3({
-      accessKeyId: this.awsS3Config.accessKeyId,
-      secretAccessKey: this.awsS3Config.secretKey,
-      region: this.awsS3Config.region,
-    });
+    try {
+      const s3 = new AWS.S3({
+        accessKeyId: this.awsS3Config.accessKeyId,
+        secretAccessKey: this.awsS3Config.secretKey,
+        region: this.awsS3Config.region,
+      });
 
-    const fileExtension = file.originalname.substr(-3);
-    const urlKey = `${id}.${fileExtension}`;
-    this.logger.log(`urlKey:${urlKey}`);
+      const fileExtension = file.originalname.substr(-3);
+      const urlKey = `${id}.${fileExtension}`;
+      this.logger.log(`urlKey:${urlKey}`);
 
-    const params = {
-      Bucket: this.awsS3Config.bucket,
-      Key: urlKey,
-      Body: file.buffer,
-    };
+      const params = {
+        Bucket: this.awsS3Config.bucket,
+        Key: urlKey,
+        Body: file.buffer,
+      };
 
-    const data = s3
-      .putObject(params)
-      .promise()
-      .then(
-        (data) => {
-          this.logger.log(data);
-          const url = `https://${this.awsS3Config.bucket}.s3-${this.awsS3Config.region}.amazonaws.com/${urlKey}`;
-          return { url };
-        },
-        (err) => {
-          if (err) {
-            this.logger.error(err);
-            return { err };
-          }
-        },
-      );
-    return data;
+      const data = await s3.putObject(params).promise();
+
+      this.logger.log(`data:${JSON.stringify(data, null, 2)}`);
+
+      const url = `https://${this.awsS3Config.bucket}.s3-${this.awsS3Config.region}.amazonaws.com/${urlKey}`;
+
+      return { url };
+    } catch (err) {
+      throw err.message;
+    }
   }
 }
