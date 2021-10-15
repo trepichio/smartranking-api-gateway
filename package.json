@@ -2,7 +2,7 @@
   "name": "api-gateway",
   "version": "0.0.1",
   "description": "a NestJS REST API Gateway which fowards requests to a message broker",
-  "author": "João Trepichio",
+  "author": "João Trepichio <trepichio@gmail.com> (https://github.com/trepichio)",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
